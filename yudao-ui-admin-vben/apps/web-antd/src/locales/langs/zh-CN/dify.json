@@ -1,0 +1,27 @@
+{
+  "chat": {
+    "conversations": "对话列表",
+    "newChat": "新建对话",
+    "startChat": "开始对话",
+    "welcome": "欢迎使用 Dify 智能对话",
+    "welcomeDesc": "选择或创建一个对话开始与 AI 助手交流",
+    "inputPlaceholder": "输入您的消息...",
+    "send": "发送",
+    "thinking": "AI 正在思考...",
+    "justNow": "刚刚",
+    "minutesAgo": "{count} 分钟前",
+    "hoursAgo": "{count} 小时前",
+    "createConversationSuccess": "创建对话成功",
+    "createConversationError": "创建对话失败",
+    "deleteConversationTitle": "删除对话",
+    "deleteConversationContent": "确定要删除这个对话吗？删除后无法恢复。",
+    "deleteConversationSuccess": "删除对话成功",
+    "deleteConversationError": "删除对话失败",
+    "loadConversationsError": "加载对话列表失败",
+    "loadMessagesError": "加载消息失败",
+    "sendMessageError": "发送消息失败",
+    "streamMode": "流式模式",
+    "streamModeDesc": "（推荐）基于 SSE 实现类似打字机输出",
+    "suggestedQuestions": "建议问题"
+  }
+}
