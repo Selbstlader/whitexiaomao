@@ -167,6 +167,7 @@
 
 <script lang="ts" setup>
 import { nextTick, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { Avatar, Button, Input, message, Modal, Spin, Switch } from 'ant-design-vue';
 import { DocAlert, Page } from '@vben/common-ui';
 import { $t } from '@vben/locales';
@@ -186,6 +187,7 @@ import {
 } from '#/api/dify/chat';
 
 const { TextArea } = Input;
+const route = useRoute();
 
 // 情感标签配置
 const emotionTags = ref([
@@ -527,9 +529,28 @@ watch(currentConversationId, (newId) => {
   }
 });
 
+// 处理路由参数
+function handleRouteParams() {
+  const { tag, conversationId } = route.query;
+
+  // 如果有标签参数，自动选择对应标签
+  if (tag && typeof tag === 'string') {
+    selectedTag.value = tag;
+  }
+
+  // 如果有对话ID参数，选择对应对话
+  if (conversationId && typeof conversationId === 'string') {
+    selectConversation(conversationId);
+  } else if (tag) {
+    // 如果只有标签参数，创建新对话
+    createNewConversation();
+  }
+}
+
 // 组件挂载时加载数据
 onMounted(() => {
   loadConversations();
+  handleRouteParams();
 });
 </script>
 
