@@ -1,17 +1,18 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
-  {
-    path: '/dify/chat',
-    name: 'DifyChat',
-    component: () => import('#/views/dify/chat/index.vue'),
-    meta: {
-      title: 'Dify 对话',
-      hideInMenu: false,
-      hideInTab: false,
-      keepAlive: true,
-    },
-  },
+  
+  // {
+  //   path: '/dify/chat',
+  //   name: 'DifyChat',
+  //   component: () => import('#/views/dify/chat/index.vue'),
+  //   meta: {
+  //     title: 'Dify 对话',
+  //     hideInMenu: false,
+  //     hideInTab: false,
+  //     keepAlive: true,
+  //   },
+  // },
   {
     path: '/dify/document/:datasetId/documents',
     name: 'DifyDocumentManagement',
