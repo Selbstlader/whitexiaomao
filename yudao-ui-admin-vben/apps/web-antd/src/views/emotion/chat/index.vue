@@ -14,7 +14,7 @@
             size="small"
             @click="createNewConversation"
           >
-            {{ $t('emotion.chat.newChat') }}
+            {{ $t('emotion.chat.newChat') }} 
           </Button>
         </div>
 
