@@ -124,7 +124,7 @@ export function useGridColumns(): VxeTableGridOptions['columns'] {
       title: '步驟編號',
     },
     {
-      field: 'dishId',
+      field: 'dishName',
       title: '所屬菜品',
     },
     {

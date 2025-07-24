@@ -83,10 +83,10 @@ const [Modal, modalApi] = useVbenModal({
         // 編輯模式
         if (values.imageFile) {
           // 有圖片，使用FormData
-          const formData = new FormData();
+    const formData = new FormData();
           formData.append('categoryId', String(Number(values.categoryId)));
-          formData.append('name', values.name);
-          if (values.description) formData.append('description', values.description);
+    formData.append('name', values.name);
+    if (values.description) formData.append('description', values.description);
           formData.append('difficulty', String(Number(values.difficulty)));
           formData.append('cookingTime', String(Number(values.cookingTime)));
           formData.append('id', String(Number(values.id)));
@@ -112,9 +112,9 @@ const [Modal, modalApi] = useVbenModal({
         if (values.description) formData.append('description', values.description);
         formData.append('difficulty', String(Number(values.difficulty)));
         formData.append('cookingTime', String(Number(values.cookingTime)));
-        if (values.imageFile) {
-          formData.append('imageFile', values.imageFile);
-        }
+    if (values.imageFile) {
+      formData.append('imageFile', values.imageFile);
+    }
         await createDish(formData);
       }
       // 關閉並提示
