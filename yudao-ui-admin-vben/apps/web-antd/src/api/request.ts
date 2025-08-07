@@ -76,14 +76,20 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 
       config.headers.Authorization = formatToken(accessStore.accessToken);
       config.headers['Accept-Language'] = preferences.app.locale;
+      
       // 添加租户编号
       config.headers['tenant-id'] = tenantEnable
         ? accessStore.tenantId
         : undefined;
-      // 只有登录时，才设置 visit-tenant-id 访问租户
       config.headers['visit-tenant-id'] = tenantEnable
         ? accessStore.visitTenantId
         : undefined;
+      
+      // 如果是FormData，不要设置Content-Type，让浏览器自动设置
+      if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+      }
+      
       return config;
     },
   });

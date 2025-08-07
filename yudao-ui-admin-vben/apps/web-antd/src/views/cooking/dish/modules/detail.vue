@@ -14,7 +14,7 @@ const difficultyMap: Record<number, { label: string; color: string }> = {
   1: { label: '簡單', color: 'green' },
   2: { label: '普通', color: 'cyan' },
   3: { label: '中等', color: 'blue' },
-  4: { label: '較難', color: 'orange' },
+  4: { label: '較难', color: 'orange' },
   5: { label: '困難', color: 'red' },
 };
 
@@ -51,6 +51,14 @@ const [Modal, modalApi] = useVbenModal({
     }
   },
 });
+
+// ✨ 工具函数：根据是否为完整 URL 决定返回值
+function getImageUrl(imageName?: string) {
+  if (!imageName) return '';
+  return imageName.startsWith('http')
+    ? imageName
+    : `/api/cooking/file/dish/${imageName}`;
+}
 </script>
 
 <template>
@@ -59,7 +67,8 @@ const [Modal, modalApi] = useVbenModal({
       <div v-if="dishDetail" class="p-4">
         <div class="flex gap-4 mb-4">
           <div class="w-1/3" v-if="dishDetail.imageName">
-            <Image :src="`/api/cooking/file/dish/${dishDetail.imageName}`" :width="240" :preview="false" />
+            <!-- ✨ 使用 getImageUrl -->
+            <Image :src="getImageUrl(dishDetail.imageName)" :width="240" :preview="false" />
           </div>
           <div class="w-2/3">
             <Descriptions :column="1" size="small" bordered>

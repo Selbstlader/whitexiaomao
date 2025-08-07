@@ -54,13 +54,20 @@ export function getDishDetail(id: number) {
 
 /** 新增菜品 */
 export function createDish(data: FormData) {
-  return requestClient.post('/cooking/dish/create', data);
+  return requestClient.post('/cooking/dish/create', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 }
 
 /** 修改菜品 */
 export function updateDish(data: FormData) {
-  // 直接使用 FormData，後端已經修改為 @RequestBody 接收
-  return requestClient.put('/cooking/dish/update', data);
+  return requestClient.put('/cooking/dish/update', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 }
 
 /** 刪除菜品 */
@@ -71,4 +78,4 @@ export function deleteDish(id: number) {
 /** 獲取所有菜品精簡列表 */
 export function getSimpleDishList() {
   return requestClient.get<CookingDishApi.SimpleDish[]>('/cooking/dish/list-all-simple');
-} 
+}

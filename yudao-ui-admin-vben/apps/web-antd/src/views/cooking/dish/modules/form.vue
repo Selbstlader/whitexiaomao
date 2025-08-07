@@ -42,29 +42,65 @@ const fileList = ref<UploadFile[]>([]);
 
 // 當圖片被更改時
 function handleImageChange(info: any) {
+  console.log('图片上传变化:', info);
+  console.log('文件状态:', info.file.status);
+  console.log('完整的info.file对象:', info.file);
+  
   if (info.file.status === 'removed') {
     fileList.value = [];
+    formApi.setFieldValue('imageFile', null);
+    console.log('图片已移除，表单字段已清空');
     return;
   }
+
+  // 确保获取正确的文件对象
+  const file = info.file.originFileObj || info.file;
+  console.log('获取的文件对象:', file);
+  console.log('文件对象类型:', typeof file);
+  console.log('是否为File实例:', file instanceof File);
   
-  fileList.value = [info.file];
-  formApi.setFieldValue('imageFile', info.file.originFileObj);
+  if (file && file instanceof File) {
+    fileList.value = [info.file];
+    // 直接设置原始文件对象，而不是包装对象
+    formApi.setFieldValue('imageFile', file);
+    console.log('图片文件已设置到表单:', file.name, file.size);
+    
+    // 验证设置是否成功
+    setTimeout(async () => {
+      const currentValues = await formApi.getValues();
+      console.log('设置后的表单值:', currentValues.imageFile);
+      console.log('imageFile是否为File:', currentValues.imageFile instanceof File);
+    }, 100);
+  } else {
+    console.warn('未能获取到有效的文件对象，file:', file);
+    console.warn('info.file.originFileObj:', info.file.originFileObj);
+    console.warn('info.file:', info.file);
+  }
 }
 
 // 初始化圖片預覽
 function initImagePreview(imageName?: string) {
   if (!imageName) {
     fileList.value = [];
+    formApi.setFieldValue('imageFile', null);
     return;
   }
-  
-  previewImageUrl.value = `/api/cooking/file/dish/${imageName}`;
-  fileList.value = [{
-    uid: '-1',
-    name: imageName,
-    status: 'done',
-    url: previewImageUrl.value,
-  }];
+
+  // ✨ 若已是完整 URL 直接使用，否则按旧规则拼接
+  previewImageUrl.value = imageName.startsWith('http')
+    ? imageName
+    : `/api/cooking/file/dish/${imageName}`;
+
+  fileList.value = [
+    {
+      uid: '-1',
+      name: imageName,
+      status: 'done',
+      url: previewImageUrl.value,
+    },
+  ];
+  // 编辑模式下，不设置imageFile，因为这是已存在的图片
+  console.log('初始化图片预览:', imageName);
 }
 
 const [Modal, modalApi] = useVbenModal({
@@ -74,50 +110,44 @@ const [Modal, modalApi] = useVbenModal({
       return;
     }
     modalApi.lock();
-    
-    // 提交表單
+  
     const values = await formApi.getValues();
+    
+    // 构建FormData
+    const formDataToSend = new FormData();
+    
+    // 添加基础字段
+    formDataToSend.append('categoryId', String(Number(values.categoryId)));
+    formDataToSend.append('name', values.name);
+    if (values.description) formDataToSend.append('description', values.description);
+    formDataToSend.append('difficulty', String(Number(values.difficulty)));
+    formDataToSend.append('cookingTime', String(Number(values.cookingTime)));
+    
+    // 编辑模式添加ID
+    if (values.id) {
+      formDataToSend.append('id', String(Number(values.id)));
+    }
+    
+    // 处理图片文件
+    let actualImageFile: File | null = null;
+    if (fileList.value.length > 0) {
+      const fileItem = fileList.value[0];
+      if (fileItem) {
+        const fileCandidate = fileItem.originFileObj || fileItem;
+        if (fileCandidate instanceof File) {
+          actualImageFile = fileCandidate;
+          formDataToSend.append('imageFile', actualImageFile);
+        }
+      }
+    }
     
     try {
       if (values.id) {
-        // 編輯模式
-        if (values.imageFile) {
-          // 有圖片，使用FormData
-    const formData = new FormData();
-          formData.append('categoryId', String(Number(values.categoryId)));
-    formData.append('name', values.name);
-    if (values.description) formData.append('description', values.description);
-          formData.append('difficulty', String(Number(values.difficulty)));
-          formData.append('cookingTime', String(Number(values.cookingTime)));
-          formData.append('id', String(Number(values.id)));
-          formData.append('imageFile', values.imageFile);
-          await updateDish(formData);
-        } else {
-          // 無圖片，使用普通對象
-          const updateData = {
-            id: Number(values.id),
-            categoryId: Number(values.categoryId),
-            name: values.name,
-            description: values.description || '',
-            difficulty: Number(values.difficulty),
-            cookingTime: Number(values.cookingTime)
-          };
-          await requestClient.put('/cooking/dish/update', updateData);
-        }
+        await updateDish(formDataToSend);
       } else {
-        // 創建模式
-        const formData = new FormData();
-        formData.append('categoryId', String(Number(values.categoryId)));
-        formData.append('name', values.name);
-        if (values.description) formData.append('description', values.description);
-        formData.append('difficulty', String(Number(values.difficulty)));
-        formData.append('cookingTime', String(Number(values.cookingTime)));
-    if (values.imageFile) {
-      formData.append('imageFile', values.imageFile);
-    }
-        await createDish(formData);
+        await createDish(formDataToSend);
       }
-      // 關閉並提示
+      
       await modalApi.close();
       emit('success');
       message.success($t('ui.actionMessage.operationSuccess'));
@@ -154,11 +184,12 @@ const [Modal, modalApi] = useVbenModal({
   <Modal :title="getTitle" width="600px">
     <Form class="mx-4">
       <template #imageFile>
-        <a-upload
-          v-model:file-list="fileList"
-          list-type="picture-card"
-          :max-count="1"
+        <a-upload 
+          v-model:file-list="fileList" 
+          list-type="picture-card" 
+          :max-count="1" 
           :before-upload="() => false"
+          accept="image/*"
           @change="handleImageChange"
         >
           <div v-if="!fileList.length">
@@ -168,4 +199,4 @@ const [Modal, modalApi] = useVbenModal({
       </template>
     </Form>
   </Modal>
-</template> 
+</template>
